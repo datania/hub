@@ -40,12 +40,10 @@ async def raw_demanda_energia_electrica() -> pl.DataFrame:
         data = [i.json()["included"][0]["attributes"]["values"] for i in gathered]
         exploded_data = [item for sublist in data for item in sublist]
 
-    return pl.from_records(exploded_data).with_columns(
-        [
-            pl.col("datetime").cast(pl.Datetime),
-            pl.col("value").cast(pl.Float64),
-        ]
-    )
+    return pl.from_records(exploded_data).with_columns([
+        pl.col("datetime").cast(pl.Datetime),
+        pl.col("value").cast(pl.Float64),
+    ])
 
 
 @dg.asset()

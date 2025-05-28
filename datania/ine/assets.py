@@ -30,15 +30,13 @@ def ipc(raw_ipc: pl.DataFrame) -> pl.DataFrame:
         pl.col("Total").alias("value"),
     )
 
-    df = df.with_columns(
-        [
-            pl.col("value").cast(pl.Float64, strict=False).alias("value"),
-            pl.col("fecha")
-            .str.replace("M", "-")
-            .str.strptime(pl.Date, format="%Y-%m")
-            .alias("fecha"),
-        ]
-    )
+    df = df.with_columns([
+        pl.col("value").cast(pl.Float64, strict=False).alias("value"),
+        pl.col("fecha")
+        .str.replace("M", "-")
+        .str.strptime(pl.Date, format="%Y-%m")
+        .alias("fecha"),
+    ])
 
     df = df.filter(pl.col("tipo_de_dato") == "Índice").drop("tipo_de_dato")
 
