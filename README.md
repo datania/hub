@@ -27,7 +27,7 @@ Datania es una plataforma de datos abiertos a nivel de España con el objetivo d
 
 Si quieres contribuir, es fácil! Clona el repositorio y sigue estas instrucciones.
 
-Cualquier problema que encuentres, no dudes en [abrir una issue](https:github.com/davidgasqyez/datania/issues/new)!
+Cualquier problema que encuentres, no dudes en [abrir una issue](https://github.com/davidgasquez/datania/issues/new)!
 
 ### 🐍 Python
 
