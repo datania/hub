@@ -1,125 +1,125 @@
-<!DOCTYPE html>
-<html lang="es">
+<!doctype html>
+<html>
+    <head>
+        <title>Datathon Kit</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap"
+            rel="stylesheet"
+        />
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="favicon.png" type="image/png">
-    <title>Datania</title>
-    <style>
-        body {
-            font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            line-height: 1.6;
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 20px;
-            color: #333;
-        }
+            body {
+                font-family: "JetBrains Mono", monospace;
+                background-color: #ffffff;
+                color: #333333;
+                line-height: 1.6;
+                padding: 2rem;
+                max-width: 800px;
+                margin: 0 auto;
+            }
 
-        h1 {
-            font-size: 60px;
-            letter-spacing: 0.1em;
-            font-weight: 800;
-            margin-bottom: 0;
-        }
+            #content {
+                font-size: 14px;
+            }
 
-        h2 {
-            margin-top: 20px;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 5px;
-        }
+            h1,
+            h2,
+            h3,
+            h4,
+            h5,
+            h6 {
+                color: #000000;
+                margin: 1.5rem 0 1rem 0;
+                font-weight: 700;
+            }
 
-        h3 {
-            margin-top: 20px;
-        }
+            p {
+                margin: 1rem 0;
+            }
 
-        a {
-            color: #0066cc;
-            text-decoration: none;
-        }
+            code {
+                background-color: #f5f5f5;
+                border: 1px solid #e0e0e0;
+                padding: 0.2rem 0.4rem;
+                border-radius: 3px;
+                font-family: "JetBrains Mono", monospace;
+            }
 
-        a:hover {
-            text-decoration: underline;
-        }
+            pre {
+                background-color: #f8f8f8;
+                border: 1px solid #e0e0e0;
+                border-radius: 5px;
+                padding: 1rem;
+                overflow-x: auto;
+                margin: 1rem 0;
+            }
 
-        ul {
-            padding-left: 20px;
-        }
+            pre code {
+                background: none;
+                border: none;
+                padding: 0;
+            }
 
-        li {
-            margin-bottom: 8px;
-        }
+            a {
+                color: #666666;
+                text-decoration: underline;
+            }
 
-        hr {
-            border: none;
-            border-top: 1px solid #eee;
-            margin: 20px 0;
-        }
+            a:hover {
+                color: #000000;
+            }
 
-        .tagline {
-            font-style: italic;
-            margin-top: 0;
-        }
+            ul,
+            ol {
+                margin: 1rem 0;
+                padding-left: 2rem;
+            }
 
-        .footer {
-            margin-top: 50px;
-            font-size: 14px;
-            color: #777;
-            text-align: center;
-        }
-    </style>
-</head>
+            blockquote {
+                border-left: 3px solid #cccccc;
+                margin: 1rem 0;
+                padding-left: 1rem;
+                color: #666666;
+            }
 
-<body>
-    <header>
-        <h1>DATANIA</h1>
-        <p class="tagline">Datos, sin complicaciones. 💃</p>
-    </header>
+            table {
+                border-collapse: collapse;
+                width: 100%;
+                margin: 1rem 0;
+            }
 
-    <hr>
+            th,
+            td {
+                border: 1px solid #e0e0e0;
+                padding: 0.5rem;
+                text-align: left;
+            }
 
-    <main>
-        <p>
-            Datania es una plataforma de datos abiertos a nivel de España con el objetivo de
-            unificar y armonizar información proveniente de diferentes fuentes. Datania ofrece una variedad de conjuntos
-            de datos en abierto!
-        </p>
-        <p style="text-align: center;">
-            <a href="https://huggingface.co/datania"
-                style="display: inline-flex; align-items: center; background-color: #FFD21E; color: #000; padding: 8px 16px; border-radius: 4px; text-decoration: none; font-weight: bold;">
-                <img src="https://huggingface.co/front/assets/huggingface_logo-noborder.svg" alt="Hugging Face Logo"
-                    style="height: 20px; margin-right: 8px;">
-                Acceder a los datos en Hugging Face
-            </a>
-        </p>
+            th {
+                background-color: #f5f5f5;
+                font-weight: 700;
+            }
+        </style>
+    </head>
 
-        <h2>Recursos</h2>
-        <p>
-            Aquí tienes algunos recursos que te pueden ser de utilidad relacionados con datos abiertos y
-            transparencia a nivel de España.
-        </p>
+    <body>
+        <div id="content"></div>
 
-        <h3>Portales</h3>
-        <ul>
-            <li><a href="https://www.ine.es/">INE</a>.</li>
-            <li><a href="https://datos.gob.es/">Datos Abiertos de España</a>.</li>
-            <li><a href="https://nap.dgt.es/dataset">DGT</a>. También en <a
-                    href="https://infocar.dgt.es/etraffic/">mapa</a>.</li>
-            <li><a href="https://opendata.aemet.es/centrodedescargas/inicio">AEMET</a>.</li>
-            <li><a href="https://www.wikidata.org/">WikiData</a>.</li>
-            <li><a href="https://opendata.esri.es/search?collection=Dataset">ESRI</a>.</li>
-            <li><a href="https://www.datadista.com/">Datadista</a>.</li>
-            <li><a href="https://transparentia.newtral.es/buscador">Newtral</a>.</li>
-            <li><a href="https://github.com/rOpenSpain/spanishoddata">Spanish Origin Destination Data</a>.</li>
-            <li><a href="https://github.com/Data-Market">DataMarket</a>.</li>
-            <li><a href="https://ec.europa.eu/eurostat/data/database">Eurostat</a>. Existe una librería en <a
-                    href="https://github.com/rOpenGov/eurostat">R</a>.</li>
-        </ul>
-    </main>
-
-    <footer class="footer">
-        <p>Built with ❤️ by <a href="https://davidgasquez.com">David Gasquez</a></p>
-    </footer>
-</body>
-
+        <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+        <script>
+            fetch("README.md")
+                .then((response) => response.text())
+                .then((markdown) => {
+                    document.getElementById("content").innerHTML =
+                        marked.parse(markdown);
+                });
+        </script>
+    </body>
 </html>

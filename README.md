@@ -15,6 +15,31 @@
 
 Datania es una plataforma de datos abiertos a nivel de España con el objetivo de unificar y armonizar información de multitud de fuentes.
 
+<p style="text-align: center;">
+    <a href="https://huggingface.co/datania"
+        style="display: inline-flex; align-items: center; background-color: #FFD21E; color: #000; padding: 8px 16px; border-radius: 4px; text-decoration: none; font-weight: bold;">
+        <img src="https://huggingface.co/front/assets/huggingface_logo-noborder.svg" alt="Hugging Face Logo"
+            style="height: 20px; margin-right: 8px;">
+        Acceder a los datos en Hugging Face
+    </a>
+</p>
+
+## 📋 Recursos
+
+Aquí tienes algunos recursos que te pueden ser de utilidad relacionados con datos abiertos y transparencia a nivel de España.
+
+- [INE](https://www.ine.es/).
+- [Datos Abiertos de España](https://datos.gob.es/).
+- [DGT](https://nap.dgt.es/dataset). También en [mapa](https://infocar.dgt.es/etraffic/).
+- [AEMET](https://opendata.aemet.es/centrodedescargas/inicio).
+- [WikiData](https://www.wikidata.org/).
+- [ESRI](https://opendata.esri.es/search?collection=Dataset).
+- [Datadista](https://www.datadista.com/).
+- [Newtral](https://transparentia.newtral.es/buscador).
+- [Spanish Origin Destination Data](https://github.com/rOpenSpain/spanishoddata).
+- [DataMarket](https://github.com/Data-Market).
+- [Eurostat](https://ec.europa.eu/eurostat/data/database). Existe una librería en [R](https://github.com/rOpenGov/eurostat).
+
 ## 💡 Principios
 
 - **Transparencia**: Código, estándares, infraestructura, y datos, son públicos. Usa herramientas, estándares e infraestructuras abiertas, y comparte datos en [formatos accesibles](https://voltrondata.com/codex/a-new-frontier).

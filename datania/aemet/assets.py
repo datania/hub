@@ -32,10 +32,12 @@ def estaciones_aemet(raw_estaciones_aemet: pl.DataFrame) -> pl.DataFrame:
             decimal = -decimal
         return decimal
 
-    df = raw_estaciones_aemet.with_columns([
-        pl.col("latitud").map_elements(convert_to_decimal).alias("latitud"),
-        pl.col("longitud").map_elements(convert_to_decimal).alias("longitud"),
-    ]).select(
+    df = raw_estaciones_aemet.with_columns(
+        [
+            pl.col("latitud").map_elements(convert_to_decimal).alias("latitud"),
+            pl.col("longitud").map_elements(convert_to_decimal).alias("longitud"),
+        ]
+    ).select(
         pl.col("latitud"),
         pl.col("longitud"),
         pl.col("provincia"),
