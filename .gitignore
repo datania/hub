@@ -169,3 +169,6 @@ dbt/.user.yml
 # data
 data/*
 !data/.gitkeep
+
+# LLM Context
+/CLAUDE.md
