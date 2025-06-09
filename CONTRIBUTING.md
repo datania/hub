@@ -20,3 +20,4 @@ Required for full functionality:
 - Use `uv` for dependency management and Python environment
 - Prefer modern libraries like Polars, httpx, DuckDB, ...
 - All datasets are designed to be published to HuggingFace Hub
+- Make pipelines idempotent, so they can be run multiple times without errors
