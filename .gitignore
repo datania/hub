@@ -172,3 +172,4 @@ data/*
 
 # LLM Context
 /CLAUDE.md
+/AGENT.md
