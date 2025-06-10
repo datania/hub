@@ -13,7 +13,7 @@ from pathlib import Path
 import httpx
 
 
-def _make_api_request_with_retry(client, url, params=None, max_retries=5):
+def _make_api_request_with_retry(client, url, params=None, max_retries=8):
     """Make an API request with exponential backoff retry for rate limiting and server errors."""
     headers = {"Accept-Encoding": "gzip, deflate", "Accept": "application/json"}
 
@@ -98,91 +98,107 @@ def download_aemet_stations():
     print(f"Downloaded {len(stations)} stations")
 
 
-def download_aemet_historical_daily():
-    """Download AEMET historical daily climatological data one day at a time starting from 1920."""
+def _download_batch_data(client, api_token, start_date, end_date):
+    """Download data for a date range and return parsed JSON data."""
+    start_str = start_date.strftime("%Y-%m-%d")
+    end_str = end_date.strftime("%Y-%m-%d")
+
+    response = _make_api_request_with_retry(
+        client,
+        f"https://opendata.aemet.es/opendata/api/valores/climatologicos/diarios/datos/fechaini/{start_str}T00:00:00UTC/fechafin/{end_str}T23:59:59UTC/todasestaciones",
+        params={"api_key": api_token},
+    )
+
+    response_data = response.json()
+    if "datos" not in response_data:
+        return None
+
+    data_response = _make_api_request_with_retry(client, response_data["datos"])
+    content = data_response.content.decode("latin-1")
+    return json.loads(content)
+
+
+def _save_batch_data_as_daily_files(batch_data, output_dir):
+    """Save batch data as individual daily files, grouped by date."""
+    if not batch_data:
+        return 0, 0
+
+    daily_data = {}
+    for record in batch_data:
+        if "fecha" in record:
+            date_key = record["fecha"]
+            if date_key not in daily_data:
+                daily_data[date_key] = []
+            daily_data[date_key].append(record)
+
+    day_count = total_records = 0
+    for date_key, day_records in daily_data.items():
+        day_file = output_dir / f"{date_key}.json"
+        if day_file.exists():
+            continue
+
+        with open(day_file, "w", encoding="utf-8") as f:
+            json.dump(day_records, f, indent=2, ensure_ascii=False)
+
+        day_count += 1
+        total_records += len(day_records)
+        print(f"  Saved {len(day_records)} records to {day_file.name}")
+
+    return day_count, total_records
+
+
+def download_aemet_historical_daily_batch():
+    """Download AEMET historical daily climatological data using 15-day batch requests."""
     api_token = os.getenv("AEMET_API_TOKEN")
     if not api_token:
         raise ValueError("AEMET_API_TOKEN environment variable is required")
 
-    # Create output directory structure
     output_dir = Path(__file__).parent.parent / "data" / "valores-climatologicos"
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    # Start from 1920-01-01
     start_date = datetime(1920, 1, 1)
     end_date = datetime.now()
     current_date = start_date
+    batch_size = 15  # API maximum
 
-    day_count = 0
-    total_records = 0
+    day_count = total_records = 0
 
     with httpx.Client(timeout=30.0) as client:
         while current_date < end_date:
-            # Format date for API (single day)
-            date_str = current_date.strftime("%Y-%m-%d")
-
-            # Check if file already exists for this day
-            day_file = output_dir / f"{date_str}.json"
-            if day_file.exists():
-                print(f"Skipping {date_str} (already exists)")
-                current_date = current_date + timedelta(days=1)
-                continue
-
-            print(f"Downloading data for {date_str}")
+            batch_end = min(
+                current_date + timedelta(days=batch_size - 1),
+                end_date - timedelta(days=1),
+            )
+            print(
+                f"Downloading batch: {current_date.strftime('%Y-%m-%d')} to {batch_end.strftime('%Y-%m-%d')}"
+            )
 
             try:
-                # Get data URL for daily climatological values with retry logic
-                response = _make_api_request_with_retry(
-                    client,
-                    f"https://opendata.aemet.es/opendata/api/valores/climatologicos/diarios/datos/fechaini/{date_str}T00:00:00UTC/fechafin/{date_str}T23:59:59UTC/todasestaciones",
-                    params={"api_key": api_token},
+                batch_data = _download_batch_data(
+                    client, api_token, current_date, batch_end
                 )
-
-                response_data = response.json()
-
-                # Check if we got a valid response with data URL
-                if "datos" in response_data:
-                    data_url = response_data["datos"]
-
-                    # Get actual data with retry logic
-                    data_response = _make_api_request_with_retry(client, data_url)
-
-                    # Handle encoding
-                    content = data_response.content.decode("latin-1")
-                    day_data = json.loads(content)
-
-                    # Save day data to individual file
-                    with open(day_file, "w", encoding="utf-8") as f:
-                        json.dump(day_data, f, indent=2, ensure_ascii=False)
-
-                    if day_data:
-                        day_count += 1
-                        total_records += len(day_data)
-                        print(f"  Saved {len(day_data)} records to {day_file.name}")
-                    else:
-                        print("  No data available for this day, saved empty file")
+                if batch_data:
+                    batch_days, batch_records = _save_batch_data_as_daily_files(
+                        batch_data, output_dir
+                    )
+                    day_count += batch_days
+                    total_records += batch_records
+                    print(f"  Complete: {batch_days} days, {batch_records} records")
                 else:
-                    print(f"  No data URL in response: {response_data}")
-
+                    print("  No data available")
             except Exception as e:
-                print(f"  Error downloading data for {date_str}: {e}")
-                print("  Continuing with next day to avoid data loss...")
+                print(f"  Error: {e}")
+                print("  Continuing...")
 
-            # Move to next day
-            current_date = current_date + timedelta(days=1)
+            current_date = batch_end + timedelta(days=1)
+            time.sleep(1.5)
 
-            # Add delay between requests to be respectful to the API
-            time.sleep(1.0)
+            if day_count > 0 and day_count % 150 == 0:  # Every 10 batches
+                print(f"Progress: {day_count} days, {total_records} records")
 
-            # Progress update every 100 days
-            if day_count % 100 == 0 and day_count > 0:
-                print(
-                    f"Progress: {day_count} days completed, {total_records} total records"
-                )
-
-    print(f"Download complete: {day_count} days, {total_records} total records")
+    print(f"Complete: {day_count} days, {total_records} records")
 
 
 if __name__ == "__main__":
     download_aemet_stations()
-    download_aemet_historical_daily()
+    download_aemet_historical_daily_batch()

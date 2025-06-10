@@ -11,6 +11,8 @@ setup: .uv
 .PHONY: run
 run: .uv
 	uv run -m datania.aemet
+	uv run -m datania.ipc
+	uv run -m datania.hipotecas
 
 .PHONY: web
 web:
@@ -23,4 +25,4 @@ lint:
 
 .PHONY: clean
 clean:
-	rm -rf data/*.parquet data/*.duckdb
+	rm -rf data/*.parquet
