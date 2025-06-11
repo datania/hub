@@ -10,9 +10,12 @@ setup: .uv
 
 .PHONY: run
 run: .uv
-	uv run -m datania.aemet
 	uv run -m datania.ipc
 	uv run -m datania.hipotecas
+
+upload: run
+	huggingface-cli upload --repo-type dataset datania/ipc datasets/ipc
+	huggingface-cli upload --repo-type dataset datania/hipotecas datasets/hipotecas
 
 .PHONY: web
 web:

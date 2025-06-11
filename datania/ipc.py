@@ -41,10 +41,21 @@ def ipc(raw_ipc: pl.DataFrame) -> pl.DataFrame:
 
 
 if __name__ == "__main__":
-    data_dir = Path("data")
-    data_dir.mkdir(exist_ok=True)
-    
+    data_dir = Path("datasets/ipc/data")
+    data_dir.mkdir(parents=True, exist_ok=True)
+
     raw_ipc_data = raw_ipc()
     ipc_data = ipc(raw_ipc_data)
-    ipc_data.write_parquet(data_dir / "ipc.parquet")
-    print("✅ ipc.parquet written")
+
+    # Sort by clase, then fecha
+    ipc_data = ipc_data.sort(["clase", "fecha"])
+
+    # Write with zstd compression, v2, and statistics
+    ipc_data.write_parquet(
+        data_dir / "ipc.parquet",
+        compression="zstd",
+        statistics=True,
+        use_pyarrow=True,
+        pyarrow_options={"version": "2.6"},
+    )
+    print("✅ datasets/ipc/data/ipc.parquet written")

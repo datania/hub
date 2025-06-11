@@ -61,7 +61,9 @@ def raw_hipotecas_indicadores_por_provincia() -> pl.DataFrame:
     column_sets = [set(df.columns) for df in dfs]
 
     # Find the intersection of all column sets
-    common_columns = set.intersection(*column_sets)
+    common_columns = (
+        column_sets[0].intersection(*column_sets[1:]) if column_sets else set()
+    )
 
     processed_dfs = [
         df.with_columns(
@@ -197,11 +199,22 @@ def hipotecas(
 
 
 if __name__ == "__main__":
-    data_dir = Path("data")
-    data_dir.mkdir(exist_ok=True)
+    data_dir = Path("datasets/hipotecas/data")
+    data_dir.mkdir(parents=True, exist_ok=True)
 
     raw_hipotecas_nacionales = raw_hipotecas_indicadores_nacionales()
     raw_hipotecas_provincia = raw_hipotecas_indicadores_por_provincia()
     hipotecas_data = hipotecas(raw_hipotecas_nacionales, raw_hipotecas_provincia)
-    hipotecas_data.write_parquet(data_dir / "hipotecas.parquet")
-    print("✅ hipotecas.parquet written")
+
+    # Sort by fecha, provincia, then variable
+    hipotecas_data = hipotecas_data.sort(["fecha", "provincia", "variable"])
+
+    # Write with zstd compression, v2, and statistics
+    hipotecas_data.write_parquet(
+        data_dir / "hipotecas.parquet",
+        compression="zstd",
+        statistics=True,
+        use_pyarrow=True,
+        pyarrow_options={"version": "2.6"},
+    )
+    print("✅ datasets/hipotecas/data/hipotecas.parquet written")
