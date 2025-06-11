@@ -52,10 +52,6 @@ if __name__ == "__main__":
 
     # Write with zstd compression, v2, and statistics
     ipc_data.write_parquet(
-        data_dir / "ipc.parquet",
-        compression="zstd",
-        statistics=True,
-        use_pyarrow=True,
-        pyarrow_options={"version": "2.6"},
+        data_dir / "ipc.parquet", compression="zstd", statistics=True
     )
     print("✅ datasets/ipc/data/ipc.parquet written")

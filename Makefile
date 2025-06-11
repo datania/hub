@@ -12,7 +12,8 @@ setup: .uv
 run: .uv
 	uv run -m datania.ipc
 	uv run -m datania.hipotecas
-	uv run -m datania.aemet
+	uv run -m datania.aemet.stations
+	uv run -m datania.aemet.daily_weather
 
 upload: run
 	huggingface-cli upload --repo-type dataset datania/ipc datasets/ipc

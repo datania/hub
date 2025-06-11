@@ -211,10 +211,6 @@ if __name__ == "__main__":
 
     # Write with zstd compression, v2, and statistics
     hipotecas_data.write_parquet(
-        data_dir / "hipotecas.parquet",
-        compression="zstd",
-        statistics=True,
-        use_pyarrow=True,
-        pyarrow_options={"version": "2.6"},
+        data_dir / "hipotecas.parquet", compression="zstd", statistics=True
     )
     print("✅ datasets/hipotecas/data/hipotecas.parquet written")
