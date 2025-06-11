@@ -70,7 +70,7 @@ def _make_api_request_with_retry(client, url, params=None, max_retries=8):
 
 
 def download_aemet_stations():
-    """Download AEMET station information."""
+    """Download AEMET station information and save with processed coordinates."""
     api_token = os.getenv("AEMET_API_TOKEN")
     if not api_token:
         raise ValueError("AEMET_API_TOKEN environment variable is required")
@@ -91,7 +91,29 @@ def download_aemet_stations():
         content = data_response.content.decode("latin-1")
         stations = json.loads(content)
 
-    # Save to file
+    # Function to convert DMS coordinates to decimal
+    def convert_to_decimal(coord):
+        if coord is None or len(coord) < 7:
+            return None
+        degrees = int(coord[:-1][:2])
+        minutes = int(coord[:-1][2:4])
+        seconds = int(coord[:-1][4:])
+        decimal = degrees + minutes / 60 + seconds / 3600
+        if coord[-1] in ["S", "W"]:
+            decimal = -decimal
+        return decimal
+
+    # Process each station to convert coordinates
+    for station in stations:
+        if "latitud" in station and station["latitud"]:
+            station["latitud"] = convert_to_decimal(station["latitud"])
+        if "longitud" in station and station["longitud"]:
+            station["longitud"] = convert_to_decimal(station["longitud"])
+
+    # Sort by indicativo
+    stations.sort(key=lambda x: x.get("indicativo", ""))
+
+    # Save processed file
     data_dir = (
         Path(__file__).parent.parent
         / "datasets"
@@ -264,7 +286,7 @@ def process_aemet_data():
     df = df.with_columns(
         pl.col("altitud").cast(pl.Int32, strict=False).alias("altitud")
     )
-    
+
     # Function to convert DMS coordinates to decimal
     def convert_to_decimal(coord):
         if coord is None or len(coord) < 7:
@@ -276,15 +298,19 @@ def process_aemet_data():
         if coord[-1] in ["S", "W"]:
             decimal = -decimal
         return decimal
-    
+
     # Process latitude and longitude if they exist
     if "latitud" in df.columns:
         df = df.with_columns(
-            pl.col("latitud").map_elements(convert_to_decimal, return_dtype=pl.Float64).alias("latitud")
+            pl.col("latitud")
+            .map_elements(convert_to_decimal, return_dtype=pl.Float64)
+            .alias("latitud")
         )
     if "longitud" in df.columns:
         df = df.with_columns(
-            pl.col("longitud").map_elements(convert_to_decimal, return_dtype=pl.Float64).alias("longitud")
+            pl.col("longitud")
+            .map_elements(convert_to_decimal, return_dtype=pl.Float64)
+            .alias("longitud")
         )
 
     # Sort by fecha, then indicativo (consistent with other pipelines)
@@ -292,63 +318,17 @@ def process_aemet_data():
 
     # Save to parquet with same settings as other pipelines
     output_file = base_dir / "data" / "datos_meteorologicos_estaciones_aemet.parquet"
-    df.write_parquet(
-        output_file,
-        compression="zstd",
-        statistics=True,
-        use_pyarrow=True,
-        pyarrow_options={"version": "2.6"},
+    df.write_parquet(output_file, compression="zstd", statistics=True)
+
+    print(
+        "✅ datasets/datos_meteorologicos_estaciones_aemet/data/datos_meteorologicos_estaciones_aemet.parquet written"
     )
-
-    print("✅ datasets/datos_meteorologicos_estaciones_aemet/data/datos_meteorologicos_estaciones_aemet.parquet written")
-    print(f"   {len(df)} records | {df['fecha'].min()} to {df['fecha'].max()} | {df['indicativo'].n_unique()} stations")
-
-
-def process_aemet_stations():
-    """Process AEMET stations data with coordinate conversion."""
-    base_dir = (
-        Path(__file__).parent.parent
-        / "datasets"
-        / "datos_meteorologicos_estaciones_aemet"
+    print(
+        f"   {len(df)} records | {df['fecha'].min()} to {df['fecha'].max()} | {df['indicativo'].n_unique()} stations"
     )
-    
-    # Read stations JSON
-    with open(base_dir / "data" / "estaciones.json", "r", encoding="utf-8") as f:
-        stations = json.load(f)
-    
-    # Function to convert DMS coordinates to decimal
-    def convert_to_decimal(coord):
-        if coord is None or len(coord) < 7:
-            return None
-        degrees = int(coord[:-1][:2])
-        minutes = int(coord[:-1][2:4])
-        seconds = int(coord[:-1][4:])
-        decimal = degrees + minutes / 60 + seconds / 3600
-        if coord[-1] in ["S", "W"]:
-            decimal = -decimal
-        return decimal
-    
-    # Process each station to convert coordinates
-    for station in stations:
-        if "latitud" in station and station["latitud"]:
-            station["latitud"] = convert_to_decimal(station["latitud"])
-        if "longitud" in station and station["longitud"]:
-            station["longitud"] = convert_to_decimal(station["longitud"])
-    
-    # Sort by indicativo
-    stations.sort(key=lambda x: x.get("indicativo", ""))
-    
-    # Save processed JSON
-    output_file = base_dir / "data" / "estaciones_processed.json"
-    with open(output_file, "w", encoding="utf-8") as f:
-        json.dump(stations, f, indent=2, ensure_ascii=False)
-    
-    print(f"✅ {output_file} written")
-    print(f"   {len(stations)} stations")
 
 
 if __name__ == "__main__":
     download_aemet_stations()
     download_aemet_historical_daily_batch()
     process_aemet_data()
-    process_aemet_stations()

@@ -12,11 +12,11 @@ Datania is a minimalistic and functional open data platform to help transform an
 
 ### Data Pipeline Architecture
 
-- Simple and functional.
+- Simple and functional scripts.
 - Low abstractions, no frameworks.
 - Each file is a self-contained dataset.
-- Rely on Makefile for orchestration.
-- Datasets are stored in the `data/` directory.
+- Rely on `Makefile` for orchestration.
+- Datasets are stored in the `dataset/` directory.
 
 ### Minimalistic Example
 
@@ -33,7 +33,7 @@ if __name__ == "__main__":
     dep = pl.read_parquet("data/source.parquet")
     res = A(dep)
     Path("data").mkdir(exist_ok=True)
-    res.to_parquet("data/A.parquet")
+    res.write_parquet("data/A.parquet", compression="zstd", statistics=True)
     print("✅ A.parquet written")
 ```
 
