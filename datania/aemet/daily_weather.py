@@ -48,8 +48,6 @@ def download_batch(client, api_token, start_date, end_date):
     if response is None:
         raise Exception("Failed to get response after retries")
 
-    print(response.text)
-
     response_data = response.json()
     if "datos" not in response_data:
         return None
@@ -62,7 +60,7 @@ def download_batch(client, api_token, start_date, end_date):
 
 
 def save_daily_files(batch_data, output_dir):
-    """Save batch data as individual daily files."""
+    """Save batch data as individual daily files in YYYY/MM/DD.json structure."""
     if not batch_data:
         return 0
 
@@ -76,7 +74,12 @@ def save_daily_files(batch_data, output_dir):
     # Save each day
     saved = 0
     for date_key, records in daily_data.items():
-        file_path = output_dir / f"{date_key}.json"
+        # Parse date to create directory structure
+        year, month, day = date_key.split("-")
+        date_dir = output_dir / year / month
+        date_dir.mkdir(parents=True, exist_ok=True)
+
+        file_path = date_dir / f"{day}.json"
         if not file_path.exists():
             file_path.write_text(json.dumps(records, indent=2, ensure_ascii=False))
             saved += 1
@@ -116,9 +119,10 @@ def download_historical_daily():
             missing = False
             check_date = current_date
             while check_date <= batch_end:
-                if not (
-                    output_dir / f"{check_date.strftime('%Y-%m-%d')}.json"
-                ).exists():
+                year = check_date.strftime("%Y")
+                month = check_date.strftime("%m")
+                day = check_date.strftime("%d")
+                if not (output_dir / year / month / f"{day}.json").exists():
                     missing = True
                     break
                 check_date += timedelta(days=1)
@@ -157,10 +161,10 @@ def process_to_parquet():
     )
     raw_dir = base_dir / "data" / "raw"
 
-    # Read all JSON files
+    # Read all JSON files from YYYY/MM/DD.json structure
     print("Reading raw data files...")
     all_data = []
-    json_files = sorted(raw_dir.glob("*.json"))
+    json_files = sorted(raw_dir.glob("*/*/*.json"))
 
     for i, json_file in enumerate(json_files):
         if i % 1000 == 0 and i > 0:
