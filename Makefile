@@ -8,18 +8,27 @@
 setup: .uv
 	uv sync --frozen --all-groups
 
-db:
-	wget https://github.com/davidgasquez/datania/releases/latest/download/datania.duckdb -O data/database.duckdb
-
+.PHONY: run
 run: .uv
-	uv run dagster asset materialize --select \* -m datania.definitions
+	uv run -m datania.ipc
+	uv run -m datania.hipotecas
+	uv run -m datania.aemet.stations
+	uv run -m datania.aemet.daily_weather
 
-dev: .uv
-	uv run dagster dev
+upload:
+	huggingface-cli upload --repo-type dataset datania/ipc datasets/ipc
+	huggingface-cli upload --repo-type dataset datania/hipotecas datasets/hipotecas
+	huggingface-cli upload-large-folder --repo-type dataset datania/datos_meteorologicos_estaciones_aemet datasets/datos_meteorologicos_estaciones_aemet
 
 .PHONY: web
 web:
 	uv run python -m http.server 8000 --directory web
 
+.PHONY: lint
+lint:
+	uv run ruff check
+	uv run ty check
+
+.PHONY: clean
 clean:
-	rm -rf data/*.parquet data/*.duckdb
+	rm -rf data/*.parquet

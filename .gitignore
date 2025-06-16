@@ -166,6 +166,9 @@ dbt_packages/
 logs/
 dbt/.user.yml
 
-# data
-data/*
-!data/.gitkeep
+# Datasets Data
+datasets/*/data/
+
+# LLM Context
+/CLAUDE.md
+/AGENT.md

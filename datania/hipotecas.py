@@ -1,49 +1,8 @@
-import dagster as dg
+from pathlib import Path
+
 import polars as pl
 
 
-@dg.asset(
-    retry_policy=dg.RetryPolicy(max_retries=5),
-)
-def raw_ipc() -> pl.DataFrame:
-    """
-    Datos de la serie histórica del Índice de Precios de Consumo (IPC) en España en formato CSV.
-    """
-
-    df = pl.read_csv(
-        "https://www.ine.es/jaxiT3/files/t/csv_bdsc/50904.csv", separator=";"
-    )
-
-    return df
-
-
-@dg.asset()
-def ipc(raw_ipc: pl.DataFrame) -> pl.DataFrame:
-    """
-    Datos procesados del Índice de Precios de Consumo (IPC) en España.
-    """
-
-    df = raw_ipc.select(
-        pl.col("Clases").alias("clase"),
-        pl.col("Tipo de dato").alias("tipo_de_dato"),
-        pl.col("Periodo").alias("fecha"),
-        pl.col("Total").alias("value"),
-    )
-
-    df = df.with_columns([
-        pl.col("value").cast(pl.Float64, strict=False).alias("value"),
-        pl.col("fecha")
-        .str.replace("M", "-")
-        .str.strptime(pl.Date, format="%Y-%m")
-        .alias("fecha"),
-    ])
-
-    df = df.filter(pl.col("tipo_de_dato") == "Índice").drop("tipo_de_dato")
-
-    return df
-
-
-@dg.asset()
 def raw_hipotecas_indicadores_por_provincia() -> pl.DataFrame:
     """
     Datos de la serie histórica de Hipotecas en España a nivel de provincia.
@@ -102,7 +61,9 @@ def raw_hipotecas_indicadores_por_provincia() -> pl.DataFrame:
     column_sets = [set(df.columns) for df in dfs]
 
     # Find the intersection of all column sets
-    common_columns = set.intersection(*column_sets)
+    common_columns = (
+        column_sets[0].intersection(*column_sets[1:]) if column_sets else set()
+    )
 
     processed_dfs = [
         df.with_columns(
@@ -138,7 +99,6 @@ def raw_hipotecas_indicadores_por_provincia() -> pl.DataFrame:
     return combined_df
 
 
-@dg.asset()
 def raw_hipotecas_indicadores_nacionales() -> pl.DataFrame:
     """
     Datos de la serie de indicadores nacionales de Hipotecas en España.
@@ -209,7 +169,6 @@ def raw_hipotecas_indicadores_nacionales() -> pl.DataFrame:
     return combined_df
 
 
-@dg.asset()
 def hipotecas(
     raw_hipotecas_indicadores_nacionales: pl.DataFrame,
     raw_hipotecas_indicadores_por_provincia: pl.DataFrame,
@@ -237,3 +196,21 @@ def hipotecas(
     )
 
     return df
+
+
+if __name__ == "__main__":
+    data_dir = Path("datasets/hipotecas/data")
+    data_dir.mkdir(parents=True, exist_ok=True)
+
+    raw_hipotecas_nacionales = raw_hipotecas_indicadores_nacionales()
+    raw_hipotecas_provincia = raw_hipotecas_indicadores_por_provincia()
+    hipotecas_data = hipotecas(raw_hipotecas_nacionales, raw_hipotecas_provincia)
+
+    # Sort by fecha, provincia, then variable
+    hipotecas_data = hipotecas_data.sort(["fecha", "provincia", "variable"])
+
+    # Write with zstd compression, v2, and statistics
+    hipotecas_data.write_parquet(
+        data_dir / "hipotecas.parquet", compression="zstd", statistics=True
+    )
+    print("✅ datasets/hipotecas/data/hipotecas.parquet written")

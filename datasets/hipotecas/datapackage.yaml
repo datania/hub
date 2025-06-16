@@ -1,0 +1,4 @@
+name: hipotecas
+resources:
+  - format: parquet
+    path: data/hipotecas.parquet
