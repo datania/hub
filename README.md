@@ -1,6 +1,5 @@
 <p align="center">
   <h1 style="font-size:80px; font-weight: 800;" align="center">D A T A N I A</h1>
-  <p align="center">Datos, sin complicaciones.</a> </p>
 </p>
 
 <div align="center">
@@ -11,7 +10,7 @@
 
 <br>
 
-Datania es una plataforma de datos abiertos colaborativa con el objetivo de unificar y armonizar información de diversas fuentes a nivel de España.
+Datos, sin complicaciones. Datania es una plataforma de datos abiertos colaborativa con el objetivo de unificar y armonizar información de diversas fuentes a nivel de España.
 
 <div align="center">
 
@@ -35,8 +34,8 @@ Aquí tienes algunos recursos que te pueden ser de utilidad relacionados con dat
 - [Spanish Origin Destination Data](https://github.com/rOpenSpain/spanishoddata).
 - [DataMarket](https://github.com/Data-Market).
 - [Eurostat](https://ec.europa.eu/eurostat/data/database). Existe una librería en [R](https://github.com/rOpenGov/eurostat).
-- [Gobierto](https://www.gobierto.es/)
-- [Vulturno](https://github.com/vulturno)
+- [Gobierto](https://www.gobierto.es/).
+- [Vulturno](https://github.com/vulturno).
 
 ## 💡 Principios
 
