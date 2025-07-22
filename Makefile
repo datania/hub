@@ -10,15 +10,10 @@ setup: .uv
 
 .PHONY: run
 run: .uv
-	uv run -m datania.ipc
 	uv run -m datania.hipotecas
-	uv run -m datania.aemet.stations
-	uv run -m datania.aemet.daily_weather
 
 upload:
-	huggingface-cli upload --repo-type dataset datania/ipc datasets/ipc
 	huggingface-cli upload --repo-type dataset datania/hipotecas datasets/hipotecas
-	huggingface-cli upload-large-folder --repo-type dataset datania/datos_meteorologicos_estaciones_aemet datasets/datos_meteorologicos_estaciones_aemet
 
 .PHONY: web
 web:

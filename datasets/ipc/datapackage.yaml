@@ -1,4 +1,0 @@
-name: ipc
-resources:
-  - format: parquet
-    path: data/ipc.parquet
